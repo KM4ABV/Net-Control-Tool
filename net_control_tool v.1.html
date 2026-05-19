@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Net Control Tool by KM4ABV</title>
+    <style>
+        :root {
+            --bg-color: #12121a;
+            --panel-bg: #1c1c28;
+            --panel-header: #252538;
+            --text-color: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --status-green: #10b981;
+            --status-yellow: #f59e0b;
+            --status-red: #ef4444;
+            --status-grey: #64748b;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --card-checked: #1e293b;
+            --em-traffic: #7f1d1d;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0; padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            height: 100vh;
+            display: flex; flex-direction: column;
+            overflow: hidden;
+        }
+
+        header {
+            background-color: #0f172a;
+            padding: 12px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            z-index: 10;
+        }
+
+        .brand-container { display: flex; align-items: baseline; gap: 6px; }
+        .brand-title { margin: 0; font-size: 1.25rem; letter-spacing: 0.5px; color: var(--accent); font-weight: 700; }
+        .brand-credit { font-size: 0.85rem; font-style: italic; color: var(--text-muted); }
+        .brand-link { color: var(--text-muted); text-decoration: none; transition: color 0.2s ease; }
+        .brand-link:hover { color: var(--accent); text-decoration: underline; }
+        
+        .time-display {
+            display: flex; gap: 20px; background: #090d16; padding: 6px 16px;
+            border-radius: 6px; border: 1px solid var(--border-color);
+            font-family: monospace; font-size: 0.95rem; font-weight: bold;
+        }
+        .time-block { display: flex; gap: 6px; }
+        .time-label { color: var(--text-muted); }
+        .time-val { color: #f8fafc; }
+
+        .stats-bar {
+            background: #1e1e2f; padding: 8px 20px; display: flex; gap: 25px;
+            font-size: 0.85rem; border-bottom: 1px solid var(--border-color);
+            font-weight: 600; color: #cbd5e1;
+        }
+        .stats-group { display: flex; gap: 20px; flex-wrap: wrap; flex: 1; }
+        .stat-item span { color: var(--accent); font-weight: bold; }
+
+        .header-actions { display: flex; gap: 8px; align-items: center; }
+
+        .nav-btn {
+            background: var(--panel-bg); color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 8px 12px; cursor: pointer; border-radius: 6px;
+            font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 6px;
+            transition: all 0.2s ease;
+        }
+        .nav-btn:hover { background: var(--border-color); }
+        .nav-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+        .nav-btn.danger { background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.4); color: #fca5a5; }
+        .nav-btn.danger:hover { background: #ef4444; color: white; }
+        .nav-btn.emergency { background: #991b1b; border-color: #f87171; color: white; }
+        .nav-btn.emergency:hover { background: #b91c1c; }
+        
+        /* New Online / Offline Status Button Styling */
+        .nav-btn.mode-offline { background: #b45309; border-color: #f59e0b; color: white; }
+        .nav-btn.mode-offline:hover { background: #d97706; }
+
+        .main-container { display: flex; flex: 1; overflow: hidden; position: relative; padding-bottom: 40px; }
+
+        .pane { flex: 1; display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        #left-pane { border-right: 1px solid var(--border-color); flex: 1.1; background-color: rgba(30, 41, 59, 0.2); }
+        #right-pane { flex: 0.9; background-color: rgba(15, 23, 42, 0.1); position: relative; }
+
+        .pane-header-wrapper {
+            background: var(--panel-header); padding: 12px 16px; border-radius: 8px 8px 0 0;
+            border: 1px solid var(--border-color); border-bottom: none;
+            font-weight: 600; font-size: 0.95rem; color: #f8fafc; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+
+        .pane-body-box {
+            background: var(--panel-bg); border: 1px solid var(--border-color);
+            border-radius: 0 0 8px 8px; flex: 1; padding: 15px; overflow-y: auto;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+
+        #save-indicator {
+            position: absolute; top: 16px; right: 25px; background: #065f46; color: #34d399;
+            font-size: 0.75rem; padding: 4px 10px; border-radius: 4px; border: 1px solid #047857;
+            font-weight: 600; opacity: 0; transition: opacity 0.25s ease; pointer-events: none; z-index: 20;
+        }
+        #save-indicator.visible { opacity: 1; }
+
+        .roster-item {
+            background: #222533; padding: 12px 15px; border-radius: 6px;
+            border-left: 5px solid var(--status-grey); display: flex; justify-content: space-between; align-items: center;
+        }
+        .roster-item.green { border-left-color: var(--status-green); }
+        .roster-item.yellow { border-left-color: var(--status-yellow); }
+        .roster-item.red { border-left-color: var(--status-red); }
+        .roster-item.grey { border-left-color: var(--status-grey); }
+
+        .callsign-badge { font-weight: 700; font-size: 1.15rem; font-family: monospace; color: #fff; }
+        .operator-info { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
+        .geo-info { font-size: 0.8rem; color: var(--accent); font-family: monospace; margin-top: 2px; }
+        .milestone-info { font-size: 0.8rem; color: #a78bfa; font-weight: 500; margin-top: 2px; }
+        .memo-text-preview { font-size: 0.8rem; color: #f59e0b; font-style: italic; margin-top: 3px; }
+        
+        .history-summary { font-size: 0.8rem; color: #34d399; margin-top: 4px; border-top: 1px dashed #334155; padding-top: 4px; }
+        .history-entry-item { margin-bottom: 2px; line-height: 1.3; }
+        .history-entry-item.em { color: #f87171; font-weight: bold; background: rgba(239, 68, 68, 0.1); padding: 2px 4px; border-radius: 3px; }
+
+        .action-tray { display: flex; gap: 6px; align-items: center; }
+        .qrz-link { 
+            background: #334155; color: #f1f5f9; text-decoration: none; font-size: 0.75rem; 
+            padding: 6px 10px; border-radius: 4px; font-weight: 600;
+        }
+        .memo-btn, .delete-btn, .em-toggle-btn { background: none; border: none; font-size: 1.05rem; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; }
+        .delete-btn:hover { background: rgba(239, 68, 68, 0.2); border-radius: 4px; }
+
+        .session-item {
+            background: #242936; padding: 14px 16px; border-radius: 8px;
+            border: 1px solid var(--border-color); display: flex; align-items: center; gap: 15px;
+            flex-wrap: wrap;
+        }
+        .session-item.checked { background: var(--card-checked); border-color: rgba(51, 65, 85, 0.4); opacity: 0.6; }
+        .session-item.checked .session-call { text-decoration: line-through; color: var(--text-muted); }
+        .session-item.emergency-active { border-color: #f87171; background: var(--em-traffic); }
+
+        .checkbox-container { display: flex; align-items: center; justify-content: center; }
+        .session-checkbox { width: 22px; height: 22px; cursor: pointer; accent-color: var(--status-green); }
+
+        .session-details { flex: 1; min-width: 200px; }
+        .session-call { font-weight: 700; font-size: 1.2rem; font-family: monospace; color: #f8fafc; }
+        .session-meta { font-size: 0.85rem; color: var(--text-muted); margin-top: 1px; }
+        
+        .tactical-inputs-row {
+            display: flex; gap: 8px; width: 100%; margin-top: 8px; border-top: 1px solid #334155; padding-top: 8px; align-items: center;
+        }
+        .tactical-inputs-row input {
+            background: #0f172a; border: 1px solid var(--border-color); color: white;
+            border-radius: 4px; padding: 6px 10px; font-size: 0.85rem; box-sizing: border-box; height: 32px;
+        }
+        .input-rst { width: 50px; font-family: monospace; text-align: center; }
+        .input-wx { width: 120px; }
+        .input-comment { flex: 1; }
+        
+        /* Tactical Card Manual Save Trigger Button */
+        .card-save-btn {
+            background: #065f46; color: white; border: 1px solid #047857; padding: 0 12px;
+            border-radius: 4px; font-size: 0.8rem; font-weight: bold; cursor: pointer; height: 32px;
+            display: flex; align-items: center; justify-content: center; transition: background 0.2s;
+        }
+        .card-save-btn:hover { background: #047857; }
+
+        .retry-badge {
+            font-size: 0.75rem; color: #ef4444; background: rgba(239, 68, 68, 0.1);
+            padding: 3px 8px; border-radius: 4px; cursor: pointer; display: inline-block; margin-left: 8px;
+            border: 1px solid rgba(239, 68, 68, 0.2); font-weight: 700; font-family: monospace;
+            text-transform: uppercase; transition: all 0.2s ease;
+        }
+        .retry-badge:hover { background: #ef4444; color: white; }
+
+        .input-group { margin-bottom: 15px; }
+        .input-group input {
+            width: 100%; padding: 14px; background: #0f172a; border: 1px solid var(--border-color);
+            color: white; font-size: 1.1rem; border-radius: 8px; text-transform: uppercase;
+            font-family: monospace; font-weight: bold; box-sizing: border-box;
+        }
+
+        #log-drawer {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 220px; background: #090d16;
+            border-top: 2px solid var(--border-color); transform: translateY(180px);
+            transition: transform 0.3s ease; display: flex; flex-direction: column; z-index: 50;
+        }
+        #log-drawer.open { transform: translateY(0); }
+        .drawer-trigger {
+            background: #1e293b; height: 40px; padding: 0 20px; display: flex;
+            justify-content: space-between; align-items: center; cursor: pointer; font-size: 0.8rem;
+        }
+        #scratchpad { flex: 1; width: 100%; background: #020617; color: #34d399; border: none; font-family: monospace; padding: 12px; }
+
+        #settings-overlay, #memo-overlay, #print-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 100;
+        }
+        .settings-card { background: var(--panel-bg); padding: 25px; border-radius: 8px; border: 1px solid var(--border-color); width: 400px; }
+        .settings-card h2 { margin-top: 0; color: var(--accent); font-size: 1.3rem; }
+        .settings-card label { display: block; margin: 15px 0 5px; font-size: 0.85rem; color: var(--text-muted); }
+        .settings-card input, .settings-card textarea { width: 100%; padding: 10px; box-sizing: border-box; background: #0f172a; border: 1px solid var(--border-color); color: white; border-radius: 6px;}
+        .settings-actions { margin-top: 25px; display: flex; justify-content: flex-end; gap: 10px; }
+
+        .date-badge-container {
+            display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 20px; max-height: 120px; overflow-y: auto;
+            background: #0f172a; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color);
+        }
+        .date-print-badge {
+            background: #1e293b; color: #34d399; border: 1px solid #059669; padding: 6px 12px;
+            border-radius: 4px; font-family: monospace; font-size: 0.85rem; font-weight: bold; cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .date-print-badge:hover { background: #059669; color: white; }
+
+        @media print {
+            body { background: white !important; color: black !important; overflow: visible !important; height: auto !important; }
+            header, .stats-bar, #left-pane, .input-group, #log-drawer, .action-tray, .checkbox-container, .tactical-inputs-row, .nav-btn, hr, .legend, #save-indicator, #print-overlay, #settings-overlay, #memo-overlay { display: none !important; }
+            #right-pane { width: 100% !important; flex: none !important; background: transparent !important; padding: 0 !important; overflow: visible !important; }
+            .pane-header-wrapper { display: none !important; }
+            .pane-body-box { background: white !important; border: none !important; overflow: visible !important; padding: 0 !important; }
+            
+            .print-header { display: block !important; border-bottom: 3px double black; padding-bottom: 10px; margin-bottom: 20px; font-family: monospace; }
+            .print-table { display: table !important; width: 100%; border-collapse: collapse; font-family: monospace; font-size: 11px; }
+            .print-table th, .print-table td { border: 1px solid black; padding: 6px 8px; text-align: left; vertical-align: top; }
+            .print-table th { background: #e2e8f0 !important; font-weight: bold; }
+            .print-em-row { background: #fee2e2 !important; font-weight: bold; }
+            .print-em-badge { color: #b91c1c; font-weight: bold; }
+            #session-checklist { display: none !important; }
+        }
+        .print-header, .print-table { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="print-header">
+        <h1 style="margin:0; font-size: 20px; text-transform: uppercase;">Daily Radio Tactical Net Report</h1>
+        <div style="margin: 6px 0 0 0; font-size: 13px; display: flex; justify-content: space-between;">
+            <span id="print-target-date">Target Log Date: --</span>
+            <span id="print-timestamp">Compiled: --</span>
+        </div>
+        <div style="margin: 2px 0 0 0; font-size: 12px; color: #334155;" id="print-nco-coords">NCO QTH Baseline: --</div>
+    </div>
+
+    <table class="print-table">
+        <thead>
+            <tr>
+                <th style="width: 5%;">Order</th>
+                <th style="width: 10%;">Callsign</th>
+                <th style="width: 25%;">Operator Details & Station Address</th>
+                <th style="width: 14%;">Range & Bearing</th>
+                <th style="width: 8%;">Status</th>
+                <th style="width: 6%;">RST</th>
+                <th style="width: 14%;">Weather</th>
+                <th style="width: 18%;">Tactical Message</th>
+            </tr>
+        </thead>
+        <tbody id="print-table-body"></tbody>
+    </table>
+
+    <header>
+        <div class="brand-container">
+            <h1 class="brand-title">Net Control Tool</h1>
+            <span class="brand-credit">by <a href="https://km4abv.com" target="_blank" class="brand-link">KM4ABV</a></span>
+        </div>
+        
+        <div class="time-display">
+            <div class="time-block"><span class="time-label">LOCAL:</span><span class="time-val" id="clock-local">00:00:00</span></div>
+            <div class="time-block"><span class="time-label">UTC:</span><span class="time-val" id="clock-utc">00:00:00</span></div>
+        </div>
+
+        <div class="header-actions">
+            <button class="nav-btn primary" id="offline-toggle-btn" onclick="toggleOfflineMode()">🌐 Status: Online</button>
+            <button class="nav-btn emergency" onclick="openPrintCenterModal()">📋 Print Tactical PDF</button>
+            <button class="nav-btn" onclick="exportRosterToFile()">💾 Export Data</button>
+            <button class="nav-btn" onclick="document.getElementById('file-import-input').click()">📂 Import Data</button>
+            <input type="file" id="file-import-input" style="display: none;" accept=".json" onchange="importRosterFromFile(this)">
+            <button class="nav-btn danger" onclick="clearMasterRoster()">🗑 Clear Roster</button>
+            
+            <span style="border-left: 1px solid var(--border-color); height: 24px; margin: 0 4px;"></span>
+            
+            <button class="nav-btn" onclick="refreshAllCallsigns()">🔄 Sync QRZ Data</button>
+            <button class="nav-btn primary" onclick="clearSessionChecklist()">🧼 Clear Checklist</button>
+            <button class="nav-btn" onclick="toggleSettings(true)">⚙ Settings</button>
+        </div>
+    </header>
+
+    <div class="stats-bar" id="stats-banner">
+        <div class="stats-group">
+            <div class="stat-item">Tonight: <span id="stat-session">0</span></div>
+            <div class="stat-item">Total Base: <span id="stat-total">0</span></div>
+            <div class="stat-item">Active (Green): <span id="stat-green" style="color:var(--status-green)">0</span></div>
+            <div class="stat-item">Missed 1 Wk (Yellow): <span id="stat-yellow" style="color:var(--status-yellow)">0</span></div>
+            <div class="stat-item">Missed 2 Wk (Red): <span id="stat-red" style="color:var(--status-red)">0</span></div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="pane" id="left-pane">
+            <div class="pane-header-wrapper">Master Database Roster</div>
+            <div class="pane-body-box">
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-dot" style="background: var(--status-green);"></div> Present</div>
+                    <div class="legend-item"><div class="legend-dot" style="background: var(--status-yellow);"></div> Missed 1 Wk</div>
+                    <div class="legend-item"><div class="legend-dot" style="background: var(--status-red);"></div> Missed 2 Wks</div>
+                    <div class="legend-item"><div class="legend-dot" style="background: var(--status-grey);"></div> Inactive</div>
+                </div>
+                <div id="roster-list" class="roster-list"></div>
+                <div id="empty-notice" class="empty-state">No operators saved. Check someone in to begin.</div>
+            </div>
+        </div>
+
+        <div class="pane" id="right-pane">
+            <div class="pane-header-wrapper">Tonight's Session Checklist</div>
+            <div id="save-indicator">✓ Data Saved to Cache</div>
+            <div class="pane-body-box">
+                <div class="input-group">
+                    <input type="text" id="callsign-input" placeholder="TYPE CALLSIGN & HIT ENTER TO CHECK IN..." autocomplete="off">
+                </div>
+                <div id="session-checklist" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                <div id="session-empty" class="empty-state">Checklist empty. Type a callsign above to begin.</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="log-drawer">
+        <div class="drawer-trigger" onclick="toggleLogDrawer()">
+            <span>📜 BACKGROUND TEXT LOG (CLICK TO TOGGLE)</span>
+            <span id="drawer-arrow">▲ OPEN LOG</span>
+        </div>
+        <textarea id="scratchpad" readonly placeholder="Live data session log feeds here...&#10;"></textarea>
+    </div>
+
+    <div id="settings-overlay">
+        <div class="settings-card">
+            <h2>NCO Config & QRZ Link</h2>
+            <label>QRZ Username</label>
+            <input type="text" id="qrz-user">
+            <label>QRZ Password</label>
+            <input type="password" id="qrz-pass">
+            <hr style="border-color: var(--border-color); margin: 15px 0;">
+            <h3 style="font-size: 0.95rem; margin: 0; color: var(--accent);">NCO Home Coordinates</h3>
+            <label>Latitude (Decimal)</label>
+            <input type="number" step="0.0001" id="nco-lat-input" placeholder="e.g. 33.4655">
+            <label>Longitude (Decimal)</label>
+            <input type="number" step="0.0001" id="nco-lon-input" placeholder="e.g. -112.0736">
+            <div class="settings-actions">
+                <button class="nav-btn" onclick="toggleSettings(false)">Cancel</button>
+                <button class="nav-btn primary" onclick="saveSettings()">Save Configuration</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="memo-overlay">
+        <div class="settings-card">
+            <h2>Edit Operator Memo</h2>
+            <p style="font-size: 0.8rem; color: var(--text-muted);" id="memo-target-call">Callsign: --</p>
+            <textarea id="memo-textarea" rows="5" placeholder="Enter custom historical alerts..."></textarea>
+            <div class="settings-actions">
+                <button class="nav-btn" onclick="closeMemoModal()">Cancel</button>
+                <button class="nav-btn primary" onclick="saveNoteModal()">Save Note</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="print-overlay">
+        <div class="settings-card" style="width: 440px;">
+            <h2>Tactical PDF Print Center</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0;">Select a discovered date containing logged traffic history from the list below:</p>
+            
+            <label>Available Database Logs:</label>
+            <div class="date-badge-container" id="discovered-dates-box"></div>
+            
+            <label>Or type a custom log date manually (YYYY-MM-DD):</label>
+            <input type="text" id="manual-print-date-input" placeholder="e.g. 2026-05-14">
+            
+            <div class="settings-actions">
+                <button class="nav-btn" onclick="closePrintCenterModal()">Close Menu</button>
+                <button class="nav-btn primary" onclick="executeManualPrintField()">Generate Report</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let initialMockRoster = {
+            "W6XRL": { name: "George Kilowatt", address: "123 Radio Rd, Phoenix, AZ", license: "Extra", status: "green", lat: 33.4484, lon: -112.0740, memo: "Net Manager.", firstLogged: "2024-11-12", lastCheckedIn: "2026-05-18", checkInCount: 42, history: [] }
+        };
+
+        let masterRoster = JSON.parse(localStorage.getItem('netRoster')) || initialMockRoster;
+        let activeSessionLog = [];
+        let qrzSessionKey = localStorage.getItem('qrzKey') || null;
+        let isDrawerOpen = false;
+        let isOfflineModeActive = false; 
+        let currentMemoCall = "";
+        let saveTimeout = null;
+
+        let ncoLat = parseFloat(localStorage.getItem('ncoLat')) || 33.4655;
+        let ncoLon = parseFloat(localStorage.getItem('ncoLon')) || -112.0736;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const now = new Date();
+            const timestamp = now.toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+            document.getElementById('scratchpad').value = `[${timestamp}] Net Control System Initialized Natively in UTC.\n`;
+            saveAndRender();
+            renderSessionChecklist();
+            updateClocks();
+            setInterval(updateClocks, 1000);
+            
+            let u = localStorage.getItem('qrzUser');
+            let p = localStorage.getItem('qrzPass');
+            if(u && p) { fetchQRZSession(u, p); }
+        });
+
+        function toggleOfflineMode() {
+            isOfflineModeActive = !isOfflineModeActive;
+            const btn = document.getElementById('offline-toggle-btn');
+            if (isOfflineModeActive) {
+                btn.className = "nav-btn mode-offline";
+                btn.textContent = "⚠️ Status: Offline";
+                logToScratchpad("SYSTEM", "Offline profile tracking bypassed. Manual entry fallback active.");
+            } else {
+                btn.className = "nav-btn primary";
+                btn.textContent = "🌐 Status: Online";
+                logToScratchpad("SYSTEM", "Network lookup routes restored.");
+                if(localStorage.getItem('qrzUser') && localStorage.getItem('qrzPass')) {
+                    fetchQRZSession(localStorage.getItem('qrzUser'), localStorage.getItem('qrzPass'));
+                }
+            }
+        }
+
+        function openPrintCenterModal() {
+            const dateBox = document.getElementById('discovered-dates-box');
+            dateBox.innerHTML = "";
+            let uniqueDates = new Set();
+
+            Object.keys(masterRoster).forEach(call => {
+                const data = masterRoster[call];
+                if(data.history && Array.isArray(data.history)) {
+                    data.history.forEach(h => { if(h.date) uniqueDates.add(h.date); });
+                }
+            });
+
+            const todayUtcStr = new Date().toISOString().split('T')[0];
+            uniqueDates.add(todayUtcStr);
+            const sortedDates = Array.from(uniqueDates).sort().reverse();
+
+            sortedDates.forEach(dateStr => {
+                const badge = document.createElement('div');
+                badge.className = "date-print-badge";
+                badge.textContent = dateStr;
+                badge.onclick = () => { triggerPrintExecutionPipeline(dateStr); };
+                dateBox.appendChild(badge);
+            });
+
+            document.getElementById('manual-print-date-input').value = todayUtcStr;
+            document.getElementById('print-overlay').style.display = 'flex';
+        }
+
+        function closePrintCenterModal() { document.getElementById('print-overlay').style.display = 'none'; }
+        
+        function executeManualPrintField() {
+            const typedDate = document.getElementById('manual-print-date-input').value.trim();
+            if(typedDate) triggerPrintExecutionPipeline(typedDate);
+        }
+
+        function flashSaveIndicator() {
+            const ind = document.getElementById('save-indicator');
+            ind.classList.add('visible');
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => { ind.classList.remove('visible'); }, 800);
+        }
+
+        function exportRosterToFile() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(masterRoster, null, 4));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "net_roster_database.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function importRosterFromFile(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    masterRoster = JSON.parse(e.target.result);
+                    saveAndRender();
+                    renderSessionChecklist();
+                } catch(err) { alert("Invalid JSON file."); }
+            };
+            reader.readAsText(file);
+        }
+
+        function clearMasterRoster() {
+            if (confirm("🚨 WIPE ENTIRE MASTER ROSTER?")) {
+                masterRoster = {}; activeSessionLog = []; saveAndRender(); renderSessionChecklist();
+            }
+        }
+
+        function deleteCallsignFromRoster(callsign) {
+            if (confirm(`Remove ${callsign}?`)) {
+                delete masterRoster[callsign];
+                activeSessionLog = activeSessionLog.filter(item => item.callsign !== callsign);
+                saveAndRender(); renderSessionChecklist();
+            }
+        }
+
+        function updateClocks() {
+            const now = new Date();
+            document.getElementById('clock-local').textContent = now.toLocaleTimeString([], { hour12: false });
+            try {
+                document.getElementById('clock-utc').textContent = now.toUTCString().match(/(\d{2}:\d{2}:\d{2})/)[0];
+            } catch(e) {}
+        }
+
+        function calculateStatsAndAging() {
+            document.getElementById('stat-session').textContent = activeSessionLog.length;
+            const keys = Object.keys(masterRoster);
+            document.getElementById('stat-total').textContent = keys.length;
+            const today = new Date();
+            let green = 0, yellow = 0, red = 0;
+
+            keys.forEach(k => {
+                let operator = masterRoster[k];
+                if (!operator.lastCheckedIn) operator.status = "grey";
+                else {
+                    const daysDiff = Math.ceil(Math.abs(today.getTime() - new Date(operator.lastCheckedIn).getTime()) / (1000 * 3600 * 24));
+                    if (daysDiff <= 7) operator.status = "green";
+                    else if (daysDiff <= 14) operator.status = "yellow";
+                    else if (daysDiff <= 21) operator.status = "red";
+                    else operator.status = "grey";
+                }
+                if (operator.status === 'green') green++;
+                if (operator.status === 'yellow') yellow++;
+                if (operator.status === 'red') red++;
+            });
+            document.getElementById('stat-green').textContent = green;
+            document.getElementById('stat-yellow').textContent = yellow;
+            document.getElementById('stat-red').textContent = red;
+        }
+
+        function calculateDistanceAndBearing(lat1, lon1, lat2, lon2) {
+            if (!lat1 || !lon1 || !lat2 || !lon2) return null;
+            const R = 3958.8; 
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+            const distance = Math.round(R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))));
+
+            const y = Math.sin(dLon) * Math.cos(lat2 * Math.PI / 180);
+            const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) - Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos(dLon);
+            let brng = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+            const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+            return `${distance} mi @ ${Math.round(brng)}° ${directions[Math.round(brng / 45) % 8]}`;
+        }
+
+        function toggleLogDrawer() { isDrawerOpen = !isDrawerOpen; document.getElementById('log-drawer').className = isDrawerOpen ? 'open' : ''; }
+        function toggleSettings(show) { document.getElementById('settings-overlay').style.display = show ? 'flex' : 'none'; }
+
+        async function saveSettings() {
+            ncoLat = parseFloat(document.getElementById('nco-lat-input').value) || 33.4655;
+            ncoLon = parseFloat(document.getElementById('nco-lon-input').value) || -112.0736;
+            let u = document.getElementById('qrz-user').value.trim();
+            let p = document.getElementById('qrz-pass').value.trim();
+            localStorage.setItem('qrzUser', u);
+            localStorage.setItem('qrzPass', p);
+            localStorage.setItem('ncoLat', ncoLat); localStorage.setItem('ncoLon', ncoLon);
+            toggleSettings(false); 
+            if(!isOfflineModeActive) await fetchQRZSession(u, p);
+        }
+
+        async function fetchQRZSession(user, pass) {
+            if(!user || !pass) return;
+            logToScratchpad("SYSTEM", `Authenticating credentials for account: ${user}...`);
+            try {
+                let targetUrl = `https://xmldata.qrz.com/xml/current/?username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}&agent=NetControlToolKM4ABV`;
+                let proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+                
+                let res = await fetch(proxyUrl);
+                let data = await res.json();
+                let contentsStr = data.contents;
+
+                let xmlDoc = (new DOMParser()).parseFromString(contentsStr, "text/xml");
+                let key = xmlDoc.getElementsByTagName("Key")[0]?.textContent;
+                let errorMsg = xmlDoc.getElementsByTagName("Error")[0]?.textContent;
+
+                if(key) { 
+                    qrzSessionKey = key; 
+                    localStorage.setItem('qrzKey', key); 
+                    logToScratchpad("SYSTEM", "QRZ API session authenticated successfully.");
+                    saveAndRender(); 
+                } else if(errorMsg) {
+                    logToScratchpad("QRZ-WARN", `Login Denied: ${errorMsg}`);
+                }
+            } catch(e) {
+                logToScratchpad("ERROR", "Proxy gateway connection error during session initialization.");
+            }
+        }
+
+        document.getElementById('callsign-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && this.value.trim() !== "") { processCheckIn(this.value.trim().toUpperCase()); this.value = ""; }
+        });
+
+        function logToScratchpad(tag, message) {
+            const pad = document.getElementById('scratchpad');
+            pad.value += `[${new Date().toUTCString().match(/(\d{2}:\d{2}:\d{2})/)[0]} Z] [${tag}] ${message}\n`;
+            pad.scrollTop = pad.scrollHeight; 
+        }
+
+        async function processCheckIn(callsign) {
+            const cleanCall = callsign.toUpperCase().trim();
+            if (activeSessionLog.some(item => item.callsign === cleanCall)) return;
+            logToScratchpad("CHECK-IN", `${cleanCall}`);
+            
+            activeSessionLog.push({ callsign: cleanCall, checkedOff: false, order: activeSessionLog.length + 1, rst: "59", wx: "", comment: "", isEmergency: false });
+            const currentUtcDateStr = new Date().toISOString().split('T')[0];
+
+            if (masterRoster[cleanCall] && masterRoster[cleanCall].name !== "Network Timeout Error" && masterRoster[cleanCall].name !== "Fetching Data...") {
+                masterRoster[cleanCall].checkInCount = (masterRoster[cleanCall].checkInCount || 0) + 1;
+                masterRoster[cleanCall].lastCheckedIn = currentUtcDateStr;
+                saveAndRender(); renderSessionChecklist();
+                
+                // Re-populate active input cards matching historical dataset profiles on entry
+                const todayHistory = masterRoster[cleanCall].history?.find(h => h.date === currentUtcDateStr);
+                if (todayHistory) {
+                    const idx = activeSessionLog.length - 1;
+                    activeSessionLog[idx].rst = todayHistory.rst || "59";
+                    activeSessionLog[idx].wx = todayHistory.wx || "";
+                    activeSessionLog[idx].comment = todayHistory.comment || "";
+                    activeSessionLog[idx].isEmergency = todayHistory.isEmergency || false;
+                    renderSessionChecklist();
+                } else {
+                    writeActiveCardToStorage(activeSessionLog.length - 1);
+                }
+            } else {
+                // Check if Offline mode toggle flag is locked
+                if (isOfflineModeActive) {
+                    let manualName = prompt(`[OFFLINE MODE] Enter Name/Club details for station ${cleanCall}:`, "Local Offline Profile");
+                    if (manualName === null) manualName = "Local Profile";
+                    
+                    masterRoster[cleanCall] = { 
+                        name: manualName, address: "Offline Data Entry", license: "Offline Cache", status: "green", lat: null, lon: null, memo: "", firstLogged: currentUtcDateStr, lastCheckedIn: currentUtcDateStr, checkInCount: 1, history: [] 
+                    };
+                    saveAndRender(); renderSessionChecklist();
+                    writeActiveCardToStorage(activeSessionLog.length - 1);
+                } else {
+                    masterRoster[cleanCall] = { name: "Fetching Data...", address: "", license: "", status: "green", lat: null, lon: null, memo: "", firstLogged: currentUtcDateStr, lastCheckedIn: currentUtcDateStr, checkInCount: 1, history: [] };
+                    saveAndRender(); renderSessionChecklist();
+                    if (qrzSessionKey) await lookupCallsignWithRetry(cleanCall);
+                    else {
+                        masterRoster[cleanCall].name = "Local Profile";
+                        saveAndRender(); renderSessionChecklist();
+                        writeActiveCardToStorage(activeSessionLog.length - 1);
+                    }
+                }
+            }
+        }
+
+        async function lookupCallsignWithRetry(callsign, attempt = 1) {
+            const upperCall = callsign.toUpperCase().trim();
+            
+            if (!qrzSessionKey) {
+                masterRoster[upperCall].name = "Local Profile (No Session Key)";
+                saveAndRender(); renderSessionChecklist();
+                return;
+            }
+
+            let targetUrl = `https://xmldata.qrz.com/xml/current/?s=${qrzSessionKey}&callsign=${encodeURIComponent(upperCall)}`;
+            let proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 6500); 
+            
+            if (attempt > 1) {
+                masterRoster[upperCall].name = `[Retrying Lookup ${attempt}/3...]`;
+                saveAndRender(); renderSessionChecklist();
+            }
+
+            try {
+                let response = await fetch(proxyUrl, { signal: controller.signal });
+                clearTimeout(timeoutId);
+                let data = await response.json();
+                let rawContents = data.contents;
+                
+                if (!rawContents || rawContents.trim() === "") throw new Error("Empty text stream response.");
+
+                let xmlDoc = (new DOMParser()).parseFromString(rawContents, "text/xml");
+                let errorNode = xmlDoc.getElementsByTagName("Error")[0]?.textContent;
+                
+                if (errorNode) {
+                    logToScratchpad("QRZ-ERROR", `Server rejected lookup for ${upperCall}: ${errorNode}`);
+                    if (errorNode.includes("Session") || errorNode.includes("Key")) qrzSessionKey = null;
+                    throw new Error(errorNode);
+                }
+
+                let callData = xmlDoc.getElementsByTagName("Callsign")[0];
+                
+                if(callData) {
+                    let fname = callData.getElementsByTagName("fname")[0]?.textContent || "";
+                    let name = callData.getElementsByTagName("name")[0]?.textContent || "";
+                    let addr = callData.getElementsByTagName("addr1")[0]?.textContent || "";
+                    let city = callData.getElementsByTagName("addr2")[0]?.textContent || "";
+                    let state = callData.getElementsByTagName("state")[0]?.textContent || "";
+                    let licClass = callData.getElementsByTagName("class")[0]?.textContent || "";
+                    let lat = parseFloat(xmlDoc.getElementsByTagName("lat")[0]?.textContent || callData.getElementsByTagName("lat")[0]?.textContent);
+                    let lon = parseFloat(xmlDoc.getElementsByTagName("SolidLon")[0]?.textContent || xmlDoc.getElementsByTagName("lon")[0]?.textContent || callData.getElementsByTagName("lon")[0]?.textContent);
+                    
+                    masterRoster[upperCall] = {
+                        name: `${fname} ${name}`,
+                        address: `${addr}, ${city} ${state}`.replace(/^,\s*/, ''),
+                        license: translateLicense(licClass),
+                        status: "green", lat: isNaN(lat) ? null : lat, lon: isNaN(lon) ? null : lon,
+                        memo: masterRoster[upperCall]?.memo || "", firstLogged: masterRoster[upperCall]?.firstLogged || new Date().toISOString().split('T')[0],
+                        lastCheckedIn: masterRoster[upperCall]?.lastCheckedIn || new Date().toISOString().split('T')[0], checkInCount: masterRoster[upperCall]?.checkInCount || 1, history: masterRoster[upperCall]?.history || []
+                    };
+                    logToScratchpad("QRZ", `Profile populated successfully for ${upperCall}`);
+                    
+                    const loggedIndex = activeSessionLog.findIndex(item => item.callsign === upperCall);
+                    if(loggedIndex !== -1) writeActiveCardToStorage(loggedIndex);
+                } else {
+                    masterRoster[upperCall].name = "Unknown Operator";
+                    logToScratchpad("QRZ-WARN", `Callsign entry unlisted: ${upperCall}`);
+                }
+            } catch(e) {
+                clearTimeout(timeoutId);
+                if (attempt < 3 && qrzSessionKey) { 
+                    logToScratchpad("QRZ-RETRY", `Lookup bottleneck for ${upperCall}. Re-querying server link...`);
+                    await new Promise(r => setTimeout(r, 1500)); 
+                    return await lookupCallsignWithRetry(upperCall, attempt + 1); 
+                }
+                else {
+                    masterRoster[upperCall].name = "Network Timeout Error";
+                    logToScratchpad("ERROR", `Failed connecting to QRZ database nodes for station ${upperCall}`);
+                }
+            }
+            saveAndRender(); renderSessionChecklist();
+        }
+
+        async function refreshAllCallsigns() {
+            if (!qrzSessionKey) { alert("Cannot synchronize: Check your QRZ account session keys connection parameters."); return; }
+            const calls = Object.keys(masterRoster);
+            logToScratchpad("SYSTEM", `Beginning full database synchronization over ${calls.length} entries...`);
+            for (let call of calls) {
+                await lookupCallsignWithRetry(call);
+                await new Promise(resolve => setTimeout(resolve, 300));
+            }
+        }
+
+        /* EXPANDED: Added explicit Club and Special Event operational translation class matches */
+        function translateLicense(licClass) {
+            if (!licClass || licClass.trim() === "") return "General Profile";
+            let clean = licClass.toUpperCase().trim();
+            if (clean === 'E' || clean.includes('EXTRA')) return 'Extra';
+            if (clean === 'G' || clean.includes('GENERAL')) return 'General';
+            if (clean === 'T' || clean.includes('TECHNICIAN')) return 'Technician';
+            if (clean === 'C' || clean === 'CLUB') return 'Club Station';
+            if (clean === 'X' || clean === 'EVENT' || clean === 'SE') return 'Special Event Station';
+            return "Amateur Operator Class";
+        }
+
+        function openMemoModal(callsign) { currentMemoCall = callsign; document.getElementById('memo-target-call').textContent = `Callsign: ${callsign}`; document.getElementById('memo-textarea').value = masterRoster[callsign].memo || ""; document.getElementById('memo-overlay').style.display = 'flex'; }
+        function closeMemoModal() { document.getElementById('memo-overlay').style.display = 'none'; }
+        function saveNoteModal() { if (masterRoster[currentMemoCall]) { masterRoster[currentMemoCall].memo = document.getElementById('memo-textarea').value.trim(); saveAndRender(); renderSessionChecklist(); } closeMemoModal(); }
+        function toggleSessionCheck(index) { activeSessionLog[index].checkedOff = !activeSessionLog[index].checkedOff; renderSessionChecklist(); }
+
+        // Track live element values accurately without breaking string contexts
+        function syncCardStateValue(index, field, value) {
+            if (activeSessionLog[index]) {
+                activeSessionLog[index][field] = value;
+            }
+        }
+
+        // HARDENED SAVE SUBMISSION ARRAYS: Commits values into master storage file database keys
+        function writeActiveCardToStorage(index) {
+            if (!activeSessionLog[index]) return;
+            
+            const item = activeSessionLog[index];
+            const call = item.callsign;
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            if(masterRoster[call]) {
+                if(!masterRoster[call].history) masterRoster[call].history = [];
+                
+                // Dislodge matching rows to overwrite with new entry arrays
+                masterRoster[call].history = masterRoster[call].history.filter(h => h.date !== todayStr);
+                
+                masterRoster[call].history.push({
+                    date: todayStr,
+                    order: item.order,
+                    rst: item.rst || "59",
+                    wx: item.wx || "",
+                    comment: item.comment || "",
+                    isEmergency: item.isEmergency || false
+                });
+
+                localStorage.setItem('netRoster', JSON.stringify(masterRoster));
+                flashSaveIndicator();
+                renderRoster(); // Propagate update down to historical sidebar entries
+            }
+        }
+
+        function toggleEmergencyTraffic(index) {
+            activeSessionLog[index].isEmergency = !activeSessionLog[index].isEmergency;
+            writeActiveCardToStorage(index);
+            renderSessionChecklist();
+        }
+
+        function clearSessionChecklist() { if (confirm("Clear checklist?")) { activeSessionLog = []; saveAndRender(); renderSessionChecklist(); } }
+
+        function triggerPrintExecutionPipeline(targetDate) {
+            closePrintCenterModal();
+            const body = document.getElementById('print-table-body');
+            body.innerHTML = "";
+            let reportEntries = [];
+
+            Object.keys(masterRoster).forEach(call => {
+                const data = masterRoster[call];
+                const match = data.history?.find(h => h.date === targetDate);
+                if (match) {
+                    let printGeo = "Local QTH";
+                    if (ncoLat && ncoLon && data.lat && data.lon) {
+                        printGeo = calculateDistanceAndBearing(ncoLat, ncoLon, data.lat, data.lon) || "N/A";
+                    }
+
+                    reportEntries.push({
+                        callsign: call, name: data.name, address: data.address || 'Address Unlisted',
+                        geo: printGeo, order: match.order || 99, rst: match.rst || '59',
+                        wx: match.wx || '--', comment: match.comment || '--', isEmergency: match.isEmergency || false
+                    });
+                }
+            });
+
+            if (reportEntries.length === 0) { alert(`No data logged on: ${targetDate}`); return; }
+            reportEntries.sort((a, b) => a.order - b.order);
+
+            reportEntries.forEach(entry => {
+                const tr = document.createElement('tr');
+                if (entry.isEmergency) tr.className = "print-em-row";
+                tr.innerHTML = `
+                    <td><strong>#${entry.order}</strong></td>
+                    <td><strong>${entry.callsign}</strong></td>
+                    <td><strong>${entry.name}</strong><br><span style="font-size:9px; color:#475569;">${entry.address}</span></td>
+                    <td><span style="font-family:monospace;">${entry.geo}</span></td>
+                    <td>${entry.isEmergency ? '<span class="print-em-badge">🚨 EMERGENCY</span>' : 'Routine'}</td>
+                    <td><span style="font-family:monospace;">${entry.rst}</span></td>
+                    <td>${entry.wx}</td>
+                    <td>${entry.comment}</td>
+                `;
+                body.appendChild(tr);
+            });
+
+            document.getElementById('print-target-date').textContent = `Target Log Date: ${targetDate}`;
+            document.getElementById('print-timestamp').textContent = `Compiled: ${new Date().toUTCString()}`;
+            document.getElementById('print-nco-coords').textContent = `NCO Station QTH Reference: Lat ${ncoLat}, Lon ${ncoLon}`;
+            window.print();
+        }
+
+        function renderSessionChecklist() {
+            const container = document.getElementById('session-checklist');
+            container.innerHTML = "";
+            if (activeSessionLog.length === 0) { document.getElementById('session-empty').style.display = "block"; return; } 
+            document.getElementById('session-empty').style.display = "none";
+
+            activeSessionLog.forEach((item, index) => {
+                const operator = masterRoster[item.callsign] || { name: "Fetching Data...", license: "", lat: null, lon: null, memo: "" };
+                const div = document.createElement('div');
+                div.className = `session-item ${item.checkedOff ? 'checked' : ''} ${item.isEmergency ? 'emergency-active' : ''}`;
+                
+                let geoLayout = (ncoLat && ncoLon && operator.lat && operator.lon) ? `<div class="geo-info">📍 ${calculateDistanceAndBearing(ncoLat, ncoLon, operator.lat, operator.lon)}</div>` : "";
+                
+                let historyBlock = "";
+                if (masterRoster[item.callsign]?.history?.length > 0) {
+                    historyBlock = `<div class="history-summary">⌛ History:`;
+                    masterRoster[item.callsign].history.forEach(h => {
+                        historyBlock += `<div class="history-entry-item ${h.isEmergency ? 'em' : ''}">• [${h.date}] #${h.order} RST: ${h.rst} WX: ${h.wx || '--'} ${h.comment ? '- ' + h.comment : ''}</div>`;
+                    });
+                    historyBlock += `</div>`;
+                }
+
+                let isTimeout = operator.name.includes("Timeout");
+                let metaDetailsLayout = isTimeout
+                    ? `<strong>${operator.name}</strong> <span class="retry-badge" onclick="lookupCallsignWithRetry('${item.callsign}')">🔄 Force Retry</span>`
+                    : `<strong>${operator.name}</strong> • ${operator.license}`;
+
+                /* FIXED: Provided physical dedicated commit save button tag matching elements mapping */
+                div.innerHTML = `
+                    <div class="checkbox-container"><input type="checkbox" class="session-checkbox" ${item.checkedOff ? 'checked' : ''} onchange="toggleSessionCheck(${index})"></div>
+                    <div class="session-details">
+                        <div class="session-call">#${item.order} - ${item.callsign}</div>
+                        <div class="session-meta">${metaDetailsLayout}</div>
+                        ${geoLayout}
+                        ${memoIndicator = operator.memo ? `<div class="memo-text-preview">💬 Note: ${operator.memo}</div>` : ""}
+                        ${historyBlock}
+                    </div>
+                    <div class="action-tray">
+                        <button class="em-toggle-btn" onclick="toggleEmergencyTraffic(${index})">${item.isEmergency ? '🛑' : '🚨'}</button>
+                        <button class="memo-btn" onclick="openMemoModal('${item.callsign}')">📝</button>
+                        <a href="https://www.qrz.com/db/${item.callsign}" target="_blank" class="qrz-link">QRZ ↗</a>
+                    </div>
+                    <div class="tactical-inputs-row">
+                        <input type="text" class="input-rst" value="${item.rst}" placeholder="RST" oninput="syncCardStateValue(${index}, 'rst', this.value)">
+                        <input type="text" class="input-wx" value="${item.wx}" placeholder="Weather Status" oninput="syncCardStateValue(${index}, 'wx', this.value)">
+                        <input type="text" class="input-comment" value="${item.comment}" placeholder="Enter active message traffic notes..." oninput="syncCardStateValue(${index}, 'comment', this.value)">
+                        <button class="card-save-btn" onclick="writeActiveCardToStorage(${index})" title="Commit Card to Master Log">💾 Save Card</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+            calculateStatsAndAging();
+        }
+
+        function saveAndRender() { localStorage.setItem('netRoster', JSON.stringify(masterRoster)); calculateStatsAndAging(); renderRoster(); }
+
+        function renderRoster() {
+            const listContainer = document.getElementById('roster-list');
+            listContainer.innerHTML = "";
+            const keys = Object.keys(masterRoster);
+            if(keys.length === 0) { document.getElementById('empty-notice').style.display = 'block'; return; } 
+            document.getElementById('empty-notice').style.display = 'none';
+
+            keys.sort((a,b) => { const s = { 'green': 1, 'yellow': 2, 'red': 3, 'grey': 4 }; return s[masterRoster[a].status] - s[masterRoster[b].status]; });
+
+            keys.forEach(call => {
+                const data = masterRoster[call];
+                const item = document.createElement('div');
+                item.className = `roster-item ${data.status}`;
+                let geoLayout = (ncoLat && ncoLon && data.lat && data.lon) ? `<div class="geo-info">📡 ${calculateDistanceAndBearing(ncoLat, ncoLon, data.lat, data.lon)}</div>` : "";
+                
+                let historyBlock = "";
+                if (data.history && data.history.length > 0) {
+                    historyBlock = `<div class="history-summary">⌛ Net History:`;
+                    data.history.forEach(h => { historyBlock += `<div class="history-entry-item ${h.isEmergency ? 'em' : ''}">• [${h.date}] #${h.order} RST: ${h.rst} WX: ${h.wx || 'None'} ${h.comment ? '- ' + h.comment : ''}</div>`; });
+                    historyBlock += `</div>`;
+                }
+
+                item.innerHTML = `
+                    <div>
+                        <span class="callsign-badge">${call}</span>
+                        <div class="operator-details">
+                            <span class="operator-info"><strong>${data.name}</strong> • <em>${data.license}</em><br><span style="font-size:11px; color:var(--text-muted);">${data.address || 'No QTH Address Stored'}</span></span>
+                            ${geoLayout}
+                            ${historyBlock}
+                        </div>
+                    </div>
+                    <div class="action-tray">
+                        <button class="memo-btn" onclick="openMemoModal('${call}')">📝</button>
+                        <a href="https://www.qrz.com/db/${call}" target="_blank" class="qrz-link">Profile ↗</a>
+                        <button class="delete-btn" onclick="deleteCallsignFromRoster('${call}')">❌</button>
+                    </div>
+                `;
+                listContainer.appendChild(item);
+            });
+        }
+    </script>
+</body>
+</html>
