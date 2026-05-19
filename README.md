@@ -1,763 +1,470 @@
-Net Control Tool Description
+# Net Control Tool
 
-Net Control Tool is a purpose-built amateur radio net management system designed for operators who want a clean, fast, and reliable way to manage check-ins, station records, tactical traffic, maps, logs, and reports from one simple self-contained HTML file.
+## Short Summary
 
-Built with the real workflow of a net controller in mind, this tool combines the speed of a live checklist with the structure of a permanent station database. Operators can check stations in by callsign, automatically populate QRZ profile data when available, manually enter missing station details when offline, track signal reports, comments, emergency traffic, frequency, mode, time on/off, and preserve everything in an organized archive.
+**Net Control Tool** is a single-file, browser-based amateur radio net control assistant designed to help net controllers manage live check-ins, maintain a master roster, track station reports, record UTC times, organize traffic, view mapped stations, monitor propagation, and print professional tactical reports.
 
-The interface is split into two practical work areas. The left side provides the Master Roster, live Map, and Propagation tools. The right side keeps the Current Session Checklist visible at all times, allowing the net controller to manage the active net without losing sight of who is next.
+It was built for amateur radio operators who want a clean, fast, and practical tool that works during real nets without requiring a complicated installation, database server, or paid software package. The program runs from one HTML file, stores data locally in the browser, and includes features for both casual social nets and more structured emergency, training, or club operations.
 
-The program is intentionally simple to use and easy to preserve. It runs as a single HTML file, saves data locally in the browser, supports import and export backups, and does not require an installed server or complicated setup. It is ideal for hobby nets, club nets, emergency practice nets, training nets, and general amateur radio logging.
+Created by **KM4ABV Alexander Appel**.
 
-Feature Highlights
-Current Session Management
+---
 
-The Current Session Checklist allows the net controller to quickly add callsigns, rearrange speaking order, remove stations from the active session without deleting them from the master roster, and track each station’s activity during the net.
+# Detailed Program Description
 
-Each station card can include:
+**Net Control Tool** is a purpose-built net management dashboard for amateur radio operators who serve as net control stations. It is designed to replace paper check-in sheets, scattered notes, copied rosters, and improvised spreadsheets with one organized interface that can be used during an active net.
 
-Callsign
-Operator name
-License/profile type
-Address or QTH note
-QRZ profile link
-Memo/comment button
-Manual profile editor
-RST report
-Weather/status field
-Tactical message field
-Emergency traffic toggle
-UTC start and end timing
-Speaking order controls
-Remove from current session option
+The program gives the net controller a live operating screen with a permanent **Master Roster** on one side and a working **Current Session Checklist** on the other. Stations can be added by callsign, organized in order, marked as mobile, logged with signal reports, given weather and traffic notes, tracked with UTC start and end times, and saved into a long-term station history.
 
-Only the next active station displays a live UTC clock, keeping the interface clean and avoiding a screen full of moving clocks.
+The goal is simple: make net control work faster, cleaner, and easier while preserving useful history for future nets.
 
-Master Roster Database
+This tool is especially useful for:
 
-The Master Roster is the permanent station database. Once a station has checked in, its profile can be saved and reused in the future. If QRZ is unavailable or the station was previously registered, the tool can still populate saved information from local cache.
+* Nightly social nets
+* Club nets
+* Emergency communications practice nets
+* ARES, RACES, CERT, or community preparedness nets
+* Training nets
+* Traffic handling practice
+* Repeater group nets
+* Linked repeater system nets
+* Special event or public service radio operations
+* Operators who want searchable historical check-in records
 
-The roster stores:
+The program is intentionally simple to distribute. It is a single HTML file that opens in a browser. There is no installer, no local server, no external database, and no complicated setup. Data is saved locally in the browser, and the database can be exported or imported as a backup file.
 
-Callsign
-Operator name
-License/profile type
-Address/QTH
-Latitude and longitude
-Memo notes
-First logged date
-Last check-in date
-Total check-in count
-Historical session entries
-Saved tactical traffic
-Frequency and mode archive
-UTC time records
-QRZ Lookup and Sync
+---
 
-The tool supports QRZ lookup using the QRZ XML style workflow already familiar to many ham radio logging tools. QRZ lookups can populate station profile information such as name, address, license class, and coordinates when available.
+# Core Concept
 
-To reduce bottlenecks, QRZ syncing is separated into two modes:
+The program is built around two major ideas:
 
-Sync New QRZ: only attempts to sync operators that have not already been synced.
-FULL Database Sync: refreshes the full master roster and can overwrite manually entered data.
+## 1. Master Roster
 
-This avoids unnecessary repeated QRZ calls during active net control operations.
+The **Master Roster** is the long-term database of stations. Once a station is added, its information can be reused on future nets.
 
-Offline-Friendly Operation
+The roster can store:
 
-If QRZ is unavailable, or the operator is working without internet, the tool still functions. Stations can be manually added with name, profile type, address, latitude, and longitude. Once QRZ is available again, a full sync can refresh and overwrite the locally entered profile data.
+* Callsign
+* Operator name
+* License or profile type
+* Address or QTH note
+* Latitude and longitude
+* First seen date
+* Total check-in days
+* Last check-in history
+* Signal reports
+* Weather reports
+* Traffic or message notes
+* Comments and operator memos
+* QRZ lookup status
+* Manual profile data
 
-Net Controller Station
+If a station checks in again later, the tool can instantly reuse the saved profile, even when internet or QRZ access is unavailable.
 
-The tool allows the net controller’s callsign to be configured in Settings.
+## 2. Current Session Checklist
 
-When set:
+The **Current Session Checklist** is the active operating list for the net currently being run.
 
-The NCO callsign appears next to the Current Session Checklist.
-The NCO is highlighted in red text in the roster and session list.
-The NCO appears as a large red dot on the map.
-Hovering over the red NCO dot shows the net controller callsign.
-Distance lines can be drawn from the NCO station to all known mapped stations.
-Live Map
+This is where the net controller works through check-ins, rearranges order, records reports, marks mobile stations, tracks start and end times, and saves station traffic.
 
-The Map tab displays station locations using saved latitude and longitude data. It supports filtering by:
+Stations can be removed from the Current Session without deleting them from the Master Roster.
 
-Current Session
-Today’s Visitors
-This Week
-Last 30 Days
-All Operators
+---
+
+# Major Features
+
+## Callsign Check-In System
+
+The net controller can type a callsign and press Enter to add a station to the Current Session.
+
+If the callsign already exists, the saved data loads immediately.
+
+If the callsign is new, the program marks it as new and can attempt to populate information through QRZ when available.
+
+New callsigns can be labeled with a small green `*New` indicator so the net controller can quickly identify first-time check-ins.
+
+---
+
+# QRZ Lookup Support
+
+The tool supports QRZ-assisted lookup for station information.
+
+When configured with QRZ credentials, the program can attempt to retrieve station details such as:
+
+* Operator name
+* Address or QTH
+* License class
+* Latitude
+* Longitude
+
+To reduce bottlenecks, QRZ sync is separated into two workflows:
+
+## Sync New QRZ
+
+This only searches for stations that have not previously been synced. It is intended for normal use during active nets so the program does not waste time refreshing stations that are already known.
+
+## Full Database Sync
+
+This option is located inside Settings. It refreshes the full roster and can overwrite manually entered data with QRZ data.
+
+This separation helps keep the program responsive while still allowing the entire database to be updated when needed.
+
+---
+
+# Offline-Friendly Operation
+
+The program can still be useful without internet access.
+
+If QRZ is unavailable, previously saved station data can still be loaded from the local Master Roster. New stations can be manually added and edited.
+
+The manual profile editor allows the user to enter:
+
+* Name
+* License or profile type
+* Address or QTH
+* Latitude
+* Longitude
+
+This makes the tool practical for field use, portable operations, emergency exercises, or poor internet conditions.
+
+---
+
+# Mobile Station Handling
+
+Mobile stations can be marked with a checkbox.
+
+By default, when a station is marked mobile, the program moves that station toward the top of the Current Session list. This helps the net controller work mobile stations earlier in case their signal drops while traveling.
+
+This behavior can be disabled in Settings.
+
+Mobile status is saved into the station history and appears in reports.
+
+---
+
+# Station Report Saving
+
+Each current session station card includes fields for:
+
+* Signal report, such as RST
+* Weather report
+* Traffic or message notes
+
+After the net controller enters the report, clicking **Save Card** locks the report row, greys it out, and changes the button to **Edit Card**. This gives the operator a clear visual confirmation that the report was saved.
+
+Saved reports are shown in the Master Roster as a clean summary, such as:
+
+```text
+Last Report [2026-05-19]: RST: 59 | WX: Clear | Traffic: All good
+```
+
+---
+
+# UTC Timing
+
+The tool includes detailed UTC time tracking.
+
+## Per-Station UTC Times
+
+Each station can have:
+
+* UTC Start Time
+* UTC End Time
+
+Only the next active station shows a live ticking UTC clock. This prevents the screen from being cluttered with multiple moving clocks.
+
+When the station begins speaking, the net controller can lock the start time. When the station finishes, the net controller can lock the end time.
+
+Times include seconds and are saved into the station history.
+
+## Session-Level UTC Times
+
+The entire net session can also have a Start UTC and End UTC time. These are opened with a clock button next to the Current Session Checklist title.
+
+The start and end clocks operate independently. Locking the session start time does not stop the session end clock from continuing to run.
+
+Session start and end times are saved indefinitely and are included on tactical reports.
+
+---
+
+# Session Summary
+
+The tool includes a session summary editor.
+
+The net controller can write a summary of the net, including:
+
+* Net purpose
+* General comments
+* Number of check-ins
+* Emergency or priority traffic
+* Frequency changes
+* Propagation notes
+* Training observations
+* Closing remarks
+
+When the session end time is locked, the program reminds the net controller to complete a session summary.
+
+The summary can optionally print as its own final page on the tactical report.
+
+---
+
+# Net Controller Station
+
+The program has a dedicated **Net Controller Station** setting.
+
+When a net controller callsign is set:
+
+* The callsign appears near the Current Session Checklist title
+* The callsign is highlighted in red in the roster and session list
+* The NCO station appears as a large red dot on the map
+* The map can draw lines from the NCO station to known stations
+* Hovering over the NCO marker identifies the net controller station
+
+This makes it easy to visually separate the controlling station from other stations in the net.
+
+---
+
+# Mapping System
+
+The Map tab provides a visual view of stations with known latitude and longitude.
+
+The map can filter by:
+
+* Current Session
+* Today’s Visitors
+* This Week
+* Last 30 Days
+* All Operators
 
 The map includes:
 
-Operator pins
-NCO red dot
-Optional NCO-to-station distance lines
-Hover distance information
-Sidebar station list
-Live updates as new callsigns are added
-Online map tiles
-Offline distance grid fallback
+* Station pins
+* A red NCO marker
+* Optional NCO-to-station distance lines
+* Distance and bearing information
+* Sidebar station list
+* Live updates while the session changes
 
-The map can also be printed by itself without printing the rest of the app.
+There is also an offline distance grid mode. This does not require map tiles. It plots stations by calculated distance and bearing from the NCO location using saved latitude and longitude.
 
-Propagation Tab
+The map can be printed by itself without printing the rest of the program.
 
-The Propagation tab displays solar-terrestrial data from HamQSL, giving operators a quick view of current band conditions without leaving the tool.
+---
 
-Tools Menu
+# Propagation Tab
 
-The Tools menu includes utility features for net operations.
+The Propagation tab displays solar-terrestrial data from HamQSL.
 
-Current tools include:
+This gives net controllers quick access to propagation information without leaving the tool.
 
-Script: editable and saved locally, useful for net preambles, closing announcements, or standardized language.
-Band Plan Map: opens a zoomable band allocation image for quick reference.
-ID Timer
+This feature requires internet access.
 
-The built-in station identification timer helps remind the net controller when it is time to identify. It can be enabled, disabled, or adjusted from Settings.
+---
 
-Session Clock and Summary
+# Tools Menu
 
-The tool supports a session-level UTC start and end clock. The session clock is accessed with the clock emoji next to the Current Session Checklist title.
+The program includes a Tools menu for quick reference utilities.
 
-The session summary is accessed through the notepad emoji. The summary can be saved and optionally printed as its own final page in the tactical report.
+## Script Tool
 
-When the session end time is checked, the tool prompts the net controller to complete a session summary.
+The Script tool provides a saved editable script area.
 
-Tactical PDF Report
+It can be used for:
 
-The tactical report system creates a print-ready record of the session. It can include:
-
-Date
-Net controller station
-NCO coordinates
-Frequency
-Mode
-Session start and end UTC
-Check-in order
-Callsigns
-Operator details
-Address/QTH
-Range and bearing
-Status
-RST
-Weather
-Tactical message
-Emergency traffic indicator
-Individual station UTC start and end times
-Optional session summary on its own page
-Data Safety
-
-The tool includes several protections against accidental data loss.
-
-Clearing the visible session only clears the Current Session.
-Wiping the entire database is hidden in Settings.
-The database wipe requires strong confirmation.
-Import and export are available in Settings for backups.
-The Master Roster is not affected when removing someone from the Current Session.
-Net Control Tool Operating Manual
-1. Starting the Program
-
-Open the HTML file in your browser. No installation is required.
-
-Recommended browser:
-
-Chrome
-Edge
-Firefox
-
-The app saves data locally in the browser using local storage. For best results, keep using the same browser and same computer unless you export and import your database.
-
-2. Main Screen Layout
-
-The screen is divided into two main sections.
-
-Left Side
-
-The left side contains tabs:
-
-Roster
-Map
-Propagation
-Right Side
-
-The right side contains the Current Session Checklist.
-
-This is where active check-ins are managed during the net.
-
-3. Settings
-
-Click Settings in the top bar.
-
-Settings may include:
-
-QRZ username
-QRZ password
-NCO latitude
-NCO longitude
-Net Controller Station
-Session frequency
-Session mode
-ID timer settings
-Map line settings
-Print summary option
-Import data
-Export data
-Full database sync
-Wipe database
-
-The Settings window can scroll if the screen is small.
-
-4. QRZ Setup
-
-Open Settings.
-
-Enter:
-
-QRZ Username
-QRZ Password
-
-Click Save Configuration.
-
-If the credentials are accepted, the scratchpad log will show that QRZ authentication succeeded.
-
-5. Setting the Net Controller Station
-
-Open Settings.
-
-Find Net Controller Station.
-
-Enter your callsign.
-
-Save settings.
-
-The tool will:
-
-Add or update the net controller station.
-Attempt a QRZ lookup if the callsign has not already been synced.
-Highlight that callsign in red wherever it appears.
-Mark that callsign as the red NCO dot on the map.
-
-If QRZ is unavailable, the tool keeps a local placeholder that can be manually edited.
-
-6. Setting Frequency and Mode
-
-Open Settings.
-
-Enter:
-
-Current Frequency
-Current Mode
-
-Examples:
-
-146.520 MHz
-147.240+
-7.268 MHz
-FM
-USB
-LSB
-D-STAR
-Fusion
-
-Save settings.
-
-This information is archived and included in tactical reports.
-
-7. Adding a Station to the Current Session
-
-On the right side, type a callsign into the callsign input field.
-
-Press Enter.
-
-The station will be added to the Current Session Checklist.
-
-If the callsign already exists in the Master Roster, cached data is used immediately.
-
-If QRZ is available, the tool may attempt to populate station information.
-
-If QRZ is not available, the station can still be used as a local profile.
-
-8. Current Session Checklist Controls
-
-Each station in the Current Session may include several controls.
-
-Checkbox
-
-Used to mark the station as checked or completed.
-
-Up and Down Arrows
-
-Move the station higher or lower in the Current Session order.
-
-Remove from Current Session
-
-Removes the station from the Current Session only.
-
-This does not delete the station from the Master Roster.
-
-Emergency Button
-
-Marks the station as emergency traffic.
-
-Emergency traffic is visually highlighted and appears in the tactical report.
-
-Comment Button
-
-The speech bubble button opens the operator memo/comment editor.
-
-Use this for notes about the station or operator.
-
-Profile Editor
-
-The pencil button opens manual profile editing.
-
-Use this to enter or correct:
-
-Name
-License/profile type
-Address/QTH
-Latitude
-Longitude
-
-Manual data can later be overwritten by a Full Database Sync.
-
-QRZ Link
-
-Opens the station’s QRZ profile page.
-
-9. UTC Start and End Times for Each Station
-
-Each active station can have a UTC start and end time.
-
-Only the next active station shows the live ticking UTC clock.
-
-This prevents multiple clocks from moving at the same time.
-
-Start UTC
-
-When the station begins speaking, check the box next to the start time.
-
-This stamps and locks the current UTC time.
-
-End UTC
-
-When the station finishes, check the box next to the end time.
-
-This stamps and locks the current UTC time.
-
-Manual Override
-
-If a time needs correction, use the pencil edit option.
-
-Times include seconds.
-
-Example:
-
-21:14:37Z
-
-Manual entries can be typed in formats such as:
-
-211437
-21:14:37
-2114
-21:14
-10. Compact Locked Time Display
-
-When both UTC Start and UTC End are locked, the time controls collapse into a smaller read-only summary line.
-
-This keeps the checklist clean.
-
-To edit locked times, click the pencil icon.
-
-11. Session-Level Clock
-
-Next to the Current Session Checklist title, click the clock emoji.
-
-This opens the session clock popup.
-
-You can set:
-
-Session Start UTC
-Session End UTC
-
-Unchecked times tick live.
-
-Checking a box stamps and locks the current UTC time.
-
-These times are saved and included in tactical reports.
-
-12. Session Summary
-
-Next to the session clock, click the notepad emoji.
-
-This opens the Session Summary editor.
-
-Use this to write a closing summary of the net.
-
-Examples of summary content:
-
-General net purpose
-Number of check-ins
-Notable traffic
-Emergency or priority traffic
-Frequency changes
-Propagation conditions
-Training notes
-Closing remarks
-
-When the session end time is checked, the tool prompts the net controller to complete a summary.
-
-In Settings, the summary can be enabled or disabled for printing.
-
-When enabled, the summary prints as its own final page in the tactical report.
-
-13. RST, Weather, and Tactical Message
-
-Each station card includes fields for:
-
-RST
-
-Default is usually 59.
-
-Can be changed manually.
-
-Weather
-
-Use this for weather, location status, or station condition.
-
-Examples:
-
-Clear, 72F
-Mobile
-Battery power
-Light rain
-Tactical Message
-
-Use this for message traffic or notes.
-
-Examples:
-
-Checked in with no traffic.
-Has welfare traffic.
-Relay from W3ABC.
-Moved to 146.520 simplex.
-
-Click Save Card to commit the card to the historical record.
-
-14. Master Roster
-
-The Master Roster stores all known stations.
-
-It shows station details and history.
-
-Operators may be color-coded by activity status.
-
-The Master Roster is permanent unless wiped from Settings.
-
-Do not use Wipe Database unless you intend to erase everything.
-
-15. Manual Profile Editing
-
-Click the pencil icon next to a station.
-
-You can manually enter:
-
-Name
-License/profile type
-Address or QTH
-Latitude
-Longitude
-
-This is useful when:
-
-QRZ is unavailable
-Internet is down
-The station is not found
-Coordinates are missing
-You need to plot someone on the map
-
-Manual data stays saved until changed or overwritten by Full Database Sync.
-
-16. QRZ Sync Modes
-Sync New QRZ
-
-The top button is intended for routine use.
-
-It only looks up stations that have not already been QRZ synced.
-
-This helps prevent bottlenecks.
-
-FULL Database Sync
-
-Located in Settings.
-
-This attempts to refresh every station in the Master Roster.
-
-Use it when:
-
-You want to update old information
-You want manual profiles refreshed from QRZ
-You want to overwrite local entries with QRZ data
-
-Full sync may take longer on large rosters.
-
-17. Online and Offline Mode
-
-The app includes an Online/Offline status button.
-
-Online
-
-The tool attempts QRZ lookups and online map tiles.
-
-Offline
-
-The tool avoids relying on QRZ and uses local cached information where possible.
-
-New stations can still be manually entered.
-
-18. Map Tab
-
-Click the Map tab on the left side, or click the top map button if available.
-
-The map shows stations with known coordinates.
-
-Map Filters
-
-You can filter by:
-
-Current Session
-Today’s Visitors
-This Week
-Last 30 Days
-All Operators
-NCO Marker
-
-The Net Controller Station is shown as a large red dot.
-
-Hover over it to see the net controller callsign.
-
-Station Pins
-
-Stations with latitude and longitude appear as pins.
-
-Click or hover depending on the map mode to see station details.
-
-Distance Lines
-
-If enabled in Settings, lines are drawn from the NCO station to mapped stations.
-
-Hovering over a line shows distance and bearing.
-
-Offline Distance Grid
-
-When offline, the map can use a distance grid.
-
-The NCO is centered and stations plot by calculated distance and bearing from the NCO.
-
-This is not a street map, but it remains useful without internet.
-
-19. Printing the Map
-
-From the Map tab, click Print Map.
-
-This prints only the map.
-
-It hides:
-
-Header
-Roster
-Current Session
-Settings
-Tools
-Sidebar controls
-
-This is useful for a visual net coverage reference.
-
-20. Propagation Tab
-
-Click Propagation on the left side.
-
-This displays HamQSL solar-terrestrial data.
-
-This requires internet access.
-
-Use it to quickly check propagation indicators and band condition references.
-
-21. Tools Menu
-
-Click the Tools dropdown in the top bar.
-
-Script
-
-Opens a saved editable script.
-
-Use it for:
-
-Net opening script
-Net closing script
-Emergency net script
-Training net prompts
-Club announcements
+* Net opening scripts
+* Net closing scripts
+* Emergency net language
+* Repeater announcements
+* Club announcements
+* Standardized roll call language
 
 The script is saved locally.
 
-Band Plan Map
+## Band Plan Map
 
-Opens a zoomable band plan image.
+The Band Plan Map opens a zoomable reference image for amateur radio band allocations.
 
-Controls include:
+It includes:
 
-Zoom in
-Zoom out
-Close popup
+* Zoom in
+* Zoom out
+* Close
 
-Use this as a quick frequency allocation reference.
+## US Call Map
 
-22. ID Timer
+The US Call Map opens a zoomable U.S. call district map.
 
-The ID timer reminds the net controller to identify.
+It includes:
 
-Open Settings to configure:
+* Zoom in
+* Zoom out
+* Close
 
-Enabled or disabled
-Timer interval
+---
 
-When the timer expires, it alerts the operator.
+# ID Timer
 
-After identifying, reset the timer.
+The built-in ID timer helps remind the net controller when to identify.
 
-23. Tactical PDF Report
+It can be enabled, disabled, or adjusted in Settings.
 
-Click Print Tactical PDF.
+When the timer expires, the program alerts the net controller.
 
-The report includes session and station details.
+This is helpful during long nets where it is easy to lose track of time while managing check-ins and traffic.
 
-The report can include:
+---
 
-Net date
-NCO location reference
-Frequency
-Mode
-Session start and end time
-Check-in order
-Callsign
-Operator details
-Station address/QTH
-Distance and bearing
-Routine or emergency status
-RST
-Weather
-Tactical message
-Individual station start/end UTC
-Optional session summary page
+# Tactical PDF Reports
 
-Use your browser’s print dialog to print or save as PDF.
+The program includes a print-ready tactical report system.
 
-24. Printing the Session Summary
+Reports can include:
 
-Open Settings.
+* Net date
+* Net controller station
+* NCO coordinates
+* Frequency
+* Mode
+* Session Start UTC
+* Session End UTC
+* Check-in order
+* Callsign
+* Operator details
+* Address or QTH
+* Range and bearing
+* Routine, mobile, or emergency status
+* RST or signal report
+* Weather report
+* Tactical message or traffic
+* Individual station Start UTC
+* Individual station End UTC
+* Optional session summary page
 
-Enable the option to print the session summary.
+Reports can be printed or saved as PDF using the browser print dialog.
 
-When enabled, the session summary prints as its own final page in the tactical report.
+---
 
-25. Exporting Data
+# Data Import and Export
 
-Open Settings.
+The program supports database backup and transfer.
 
-Click Export Data.
+## Export Data
 
-This downloads a JSON backup of your database.
+Exports the saved database to a JSON file.
 
-The export may include:
+This can be used for:
 
-Master Roster
-Current Session
-Session frequency/mode
-Session times
-Session summaries
-Historical station records
-Saved settings where applicable
+* Backups
+* Moving the roster to another computer
+* Sharing a net database between operators
+* Preserving historical records
 
-Export regularly if you want backups.
+## Import Data
 
-26. Importing Data
+Imports a previously exported JSON file.
 
-Open Settings.
+This can restore:
 
-Click Import Data.
+* Master Roster
+* Current Session
+* Station history
+* Session details
+* Archived reports
+* Summary data
 
-Select a previously exported JSON file.
+---
 
-The tool will load the saved database.
+# Safety Features
 
-Use this when moving to another computer or restoring a backup.
+The program is designed to reduce accidental data loss.
 
-27. Clearing the Current Session
+The visible clear button only clears the Current Session. It does not delete the Master Roster.
 
-Click Clear Current Session.
+The dangerous database wipe option is hidden inside Settings and requires confirmation.
 
-This clears only the active checklist.
+This helps prevent the operator from accidentally destroying the long-term roster during a live net.
 
-It does not delete the Master Roster.
+---
 
-Use this after a net is complete and you are ready to start fresh.
+# Help System
 
-28. Wiping the Entire Database
+The program includes a Help button in the top right area.
 
-Open Settings.
+The Help popup includes a searchable operating guide so users can quickly find instructions by keyword.
 
-Use Wipe Entire Database only when you truly want to erase everything.
+This makes the tool easier to distribute to operators who have never used it before.
 
-The tool requires strong confirmation.
+---
 
-This action removes the saved roster and historical data.
+# Who This Is For
 
-There is no undo unless you have an exported backup.
+This tool is ideal for:
 
-29. Recommended Net Workflow
-Before the Net
-Open the HTML file.
-Confirm QRZ is authenticated if internet is available.
-Confirm Net Controller Station is correct.
-Set frequency and mode in Settings.
-Open the session clock and start the session time.
-Open your script from Tools if needed.
-Confirm ID timer is enabled if desired.
-During the Net
-Type each callsign and press Enter.
-Let QRZ populate the station when available.
-Use cached or manual profile data when offline.
-Track each station’s UTC start and end time.
-Enter RST, weather, and tactical traffic.
-Mark emergency traffic when applicable.
-Rearrange station order if needed.
-Use the map to view station distribution.
-Save each card as needed.
-At the End of the Net
-Lock the session end UTC time.
-Complete the session summary when prompted.
-Save final station cards.
-Print or save the tactical report as PDF.
-Export a backup if desired.
-Clear Current Session when ready for the next net.
-30. Best Practices
-Export your database regularly.
-Do not wipe the database unless you have a backup.
-Use manual profile editing for important stations with missing coordinates.
-Set your NCO coordinates correctly for accurate distance and bearing.
-Use Sync New QRZ during normal operations.
-Use Full Database Sync only when you want a complete refresh.
-Complete the session summary before printing the final report.
-Save tactical cards before closing the browser.
-Use the offline distance grid as a backup when internet is unavailable.
-Short Promotional Version
+* Ham radio clubs
+* Repeater associations
+* Net control operators
+* Emergency communications groups
+* ARES and RACES teams
+* CERT radio groups
+* Public service event communicators
+* Linked repeater net operators
+* Amateur radio instructors
+* Operators who run nightly or weekly nets
 
-Net Control Tool is a modern, single-file amateur radio net control dashboard built for fast check-ins, reliable local station records, live QRZ-assisted lookups, tactical message tracking, UTC timing, mapping, propagation monitoring, and professional PDF reporting.
+It is especially useful for operators who want a better way to track who checked in, what they said, when they spoke, where they are located, and how often they participate.
 
-It gives net controllers a clean command-center style interface with a permanent Master Roster, live Current Session Checklist, operator profile editor, emergency traffic marking, NCO station highlighting, station distance mapping, ID timer, session summary, band plan reference, net script tool, and printable tactical reports.
+---
 
-Designed for both casual ham radio nets and more structured emergency practice nets, it works online with QRZ and map tiles, but still remains useful offline through cached station data, manual profiles, and a distance-grid map.
+# Why It Is Useful
 
-All of this runs from one simple HTML file with no installer, no server, and no complicated setup.
+Traditional net control logging often relies on paper, spreadsheets, or memory. That can work for small nets, but it becomes harder as participation grows, especially when operators want to track history, manage mobile stations, document traffic, or print formal reports.
+
+This tool brings those functions together in one interface.
+
+It helps the net controller:
+
+* Move faster during roll call
+* Keep better records
+* Avoid losing station history
+* Prioritize mobile stations
+* Track emergency traffic
+* Save signal and weather reports
+* Document session times
+* Print clean tactical reports
+* Maintain a permanent roster
+* Use saved data when offline
+* Visualize station locations
+* Share or back up the database
+
+---
+
+# Simple Distribution
+
+The program is distributed as a single HTML file.
+
+Users can:
+
+1. Download the file
+2. Open it in a browser
+3. Configure Settings
+4. Start checking in stations
+
+No installation is required.
+
+No server is required.
+
+No separate database is required.
+
+The user remains in control of their own local data.
+
+---
+
+# Suggested Upload Description
+
+**Net Control Tool** is a single-file amateur radio net control dashboard for managing live check-ins, master rosters, QRZ-assisted station lookups, mobile stations, signal reports, weather reports, traffic notes, UTC timing, session summaries, station maps, propagation references, and printable tactical PDF reports.
+
+It was designed for ham radio net controllers who want a practical, easy-to-run logging and coordination tool without installing a full software suite. It works from one HTML file, stores data locally, supports import/export backups, and includes offline-friendly manual station profiles.
+
+Use it for club nets, social nets, repeater nets, training nets, emergency communications practice, and public service radio operations.
+
+Created by **KM4ABV Alexander Appel**.
