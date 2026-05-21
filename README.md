@@ -660,7 +660,7 @@ A desktop browser is recommended because the interface contains multiple panes, 
 
 ## Public Release Changes
 
-This public release removes the Band Plan feature.
+This public release removes the Band Plan feature due to permission from ARRL.
 
 The following features remain available:
 
@@ -682,17 +682,6 @@ The following features remain available:
 - Tactical PDF report
 - Scratchpad
 - Searchable help guide
-
-## License
-
-Add your project license here.
-
-Common options include:
-
-- MIT License
-- GNU General Public License
-- Apache License 2.0
-- Custom personal or club-use license
 
 ## Credits
 
